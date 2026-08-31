@@ -55,6 +55,7 @@ let
   bwrapArgs = flatten [
     # This is the equivalent of --unshare-all, see bwrap(1) for details.
     "--unshare-user-try"
+    "--unshare-net"
     (optionals (!config.bubblewrap.shareIpc) "--unshare-ipc")
     (optionals (!config.bubblewrap.sharePid) "--unshare-pid")
     (optionals (!config.bubblewrap.shareUts) "--unshare-uts")
