@@ -70,6 +70,9 @@ let
     (optionals config.bubblewrap.apivfs.dev ["--dev" "/dev"])
     (optionals config.bubblewrap.apivfs.proc ["--proc" "/proc"])
 
+    (optionals config.bubblewrap.newSession "--new-session")
+    (optionals config.bubblewrap.dieWithParent "--die-with-parent")
+
     bindDevPaths
 
     (optionals config.dbus.enable [
@@ -83,7 +86,7 @@ let
   dbusProxyArgs = [ (env "DBUS_SESSION_BUS_ADDRESS") dbusOutsidePath ] ++ config.dbus.args ++ [ "--filter" ];
 
   originalBwrapArgs = pkgs.writeText "bwrap-args.json" (builtins.toJSON bwrapArgs);
-  bwrapArgsJson = if config.bubblewrap.bindEntireStore then originalBwrapArgs else pkgs.runCommand "bwrap-args.json" {
+  bwrapArgsJson = if config.bubblewrap.bindEntireStore then originalBwrapArgs else pkgs.runCommandLocal "bwrap-args.json" {
     nativeBuildInputs = [ pkgs.jq ];
   } ''
     jq -nR '[inputs] | map("--ro-bind", ., .)' ${info}/store-paths > store-paths.json
@@ -129,7 +132,7 @@ let
     executablePath = entrypoint;
   });
 
-  envOverrides = pkgs.runCommand "nixpak-overrides-${app.name}" {} (''
+  envOverrides = pkgs.runCommandLocal "nixpak-overrides-${app.name}" {} (''
     mkdir $out
     cd ${app}
     find . -type l | while read line; do

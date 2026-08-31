@@ -89,6 +89,18 @@ in {
       type = with types; attrsOf (nullOr sloth.type);
       default = {};
     };
+
+    newSession = mkOption {
+      description = "Protects against out-of-sandbox command execution.";
+      type = types.bool;
+      default = false;
+    };
+
+    dieWithParent = mkOption {
+      description = "Ensures child processes die when parent dies.";
+      type = types.bool;
+      default = false;
+    };
   };
 
   config = {
@@ -101,7 +113,7 @@ in {
       ++ (optional cfg.wayland (sloth.concat [sloth.runtimeDir "/" (sloth.envOr "WAYLAND_DISPLAY" "wayland-0")]))
       ++ (optional cfg.pipewire (sloth.concat' sloth.runtimeDir "/pipewire-0"))
       ++ (optionals cfg.x11 [
-        (sloth.env "XAUTHORITY")
+        (sloth.envOr "XAUTHORITY" (sloth.concat' sloth.homeDir "/.Xauthority"))
         "/tmp/.X11-unix"
       ])
       ++ (optional cfg.pulse (sloth.concat' sloth.runtimeDir "/pulse"));
